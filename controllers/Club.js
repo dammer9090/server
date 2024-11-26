@@ -103,14 +103,27 @@ const deleteClub = async(req,res)=>{
     try{
         const {clubId} = req.params
 
-        const club = await Club.findByIdAndDelete({_id:clubId});
+        let club = await Club.findOne({_id:clubId})
 
+        
         if(!club){
-            return res.status(404).json({
-                success:false,
-                message: "Club not found"
-            })
+          return res.status(404).json({
+              success:false,
+              message: "Club not found"
+          })
+      }
+
+        const imageName = path.basename(club.image);
+
+        try{
+          fs.unlinkSync(path.join(__dirname, '..', 'public', 'images', imageName))
+        }catch(err){
+          console.log('failed to delete image',err)
         }
+
+
+          club = await Club.findByIdAndDelete({_id:clubId});
+
 
         res.status(200).json({
             success:true,
